@@ -58,3 +58,19 @@ body{
     overflow-y: hidden;
     border-radius: 0.8rem;
 }
+
+.btn-container{
+    width: 3rem;
+    height: 3rem;
+    background-color: $dark-color;
+    border-radius: 2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2 ease
+}
+
+.btn-container:hover{
+    background-color: rgba($color: $dark-color, $alpha:0.95);
+}
