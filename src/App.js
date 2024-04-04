@@ -20,13 +20,10 @@ const App = () => {
                 <GrUpdate />
               </div>
             </div>
-            <div className="selected-task">
+            <div className="new-task">
               <input type="text" name="description" />
               <div className="btn-container">
                 <FaPlus />
-              </div>
-              <div className="btn-container">
-                <GrUpdate />
               </div>
             </div>
           </div>

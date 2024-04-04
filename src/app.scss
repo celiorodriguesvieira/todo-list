@@ -68,9 +68,28 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: 0.2 ease
+    transition: 0.2s ease
 }
 
 .btn-container:hover{
-    background-color: rgba($color: $dark-color, $alpha:0.95);
+    background-color: rgba($color: $dark-color, $alpha:0.95);   
+}
+
+svg{
+    color: $mainbg;
+    font-size: 1.5rem;
+}
+
+.new-task, .selected-task{
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 3rem;
+    gap: 1rem;
+
+    input[type='text']{
+        outline: none;
+        
+    }
+
+
 }
