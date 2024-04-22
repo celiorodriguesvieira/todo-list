@@ -1,105 +1,198 @@
-import React, { useState } from "react";
-import { FaCheck, FaTimes } from "react-icons/fa";
-import { GrUpdate } from "react-icons/gr";
-import { FaPlus } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
 import "./app.scss";
+import { FaCheck, FaPlus, FaTimes } from "react-icons/fa";
+import { GrUpdate } from "react-icons/gr";
 import { IoPencilOutline } from "react-icons/io5";
 import { FaRegTrashCan } from "react-icons/fa6";
+import axios from "axios";
+import { FaHourglass } from "react-icons/fa6";
 
 const App = () => {
-  // const [taskList, settaskList] = useState([]);
-  // const [newTask, setNewTask] = useState([]);
+  const [taskList, setTaskList] = useState([]);
+  const [newTask, setNewTask] = useState({
+    description: "",
+    completed: false,
+  });
+  const [selectedTask, setSelectedTask] = useState(null);
 
-  const taskList = [
-    {
-      id: 135,
-      description:
-        "Clean the house Clean the houseClean the houseClean the house",
-      completed: true,
-    },
-    { id: 482, description: "Learn a new skill", completed: false },
-    { id: 719, description: "Exercise", completed: true },
-    { id: 624, description: "Write a blog post", completed: false },
-    { id: 891, description: "Organize closet", completed: true },
-    { id: 367, description: "Call a friend", completed: false },
-    { id: 502, description: "Buy groceries", completed: true },
-    { id: 198, description: "Read a book", completed: false },
-    { id: 756, description: "Plan vacation", completed: true },
-    { id: 943, description: "Finish homework", completed: false },
-    { id: 285, description: "Learn a new skill", completed: true },
-    { id: 619, description: "Call a friend", completed: false },
-    { id: 741, description: "Write a blog post", completed: true },
-    { id: 508, description: "Buy groceries", completed: false },
-    { id: 129, description: "Organize closet", completed: true },
-    { id: 370, description: "Exercise", completed: false },
-    { id: 952, description: "Read a book", completed: true },
-    { id: 654, description: "Plan vacation", completed: false },
-    { id: 427, description: "Finish homework", completed: true },
-    { id: 846, description: "Clean the house", completed: false },
-  ];
+  axios.defaults.baseURL = "http://127.0.0.1:8000/api";
+
+  // Fetch all data
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("/todos/");
+      setTaskList(response.data);
+      // console.log(response)
+    } catch (error) {
+      console.error("Error Encountered: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Fetch Filtered Data
+  const fetchFilteredData = async (value) => {
+    try {
+      const response = await axios.get(`/todos/${value}/filter`);
+      setTaskList(response.data);
+      // console.log(response)
+    } catch (error) {
+      console.error("Error Encountered: ", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setNewTask({ ...newTask, [e.target.name]: e.target.value });
+  };
+
+  const handleInputSelectChange = (e) => {
+    setSelectedTask({ ...selectedTask, [e.target.name]: e.target.value });
+  };
+
+  // add new item
+  const addNewItem = async () => {
+    if (newTask.description === "") {
+      console.log("Empty Description");
+      return;
+    }
+
+    try {
+      await axios.post("/todos/", newTask);
+      fetchData();
+      setNewTask({
+        description: "",
+        completed: false,
+      });
+    } catch (error) {
+      console.error("Error Encountered: ", error);
+    }
+  };
+
+  const updateItem = async () => {
+    try {
+      await axios.put(`/todos/${selectedTask.id}/`, selectedTask);
+      fetchData();
+      setSelectedTask(null);
+    } catch (error) {
+      console.error("Error Encountered: ", error);
+    }
+  };
+
+  const toggleCompleted = async (id) => {
+    try {
+      await axios.patch(`/todos/${id}/toggle/`);
+      fetchData();
+    } catch (error) {
+      console.error("Error Encountered: ", error);
+    }
+  };
+
+  const deleteItem = async (id) => {
+    try {
+      await axios.delete(`/todos/${id}`);
+      fetchData();
+    } catch (error) {
+      console.error("Error Encountered: ", error);
+    }
+  };
+
   return (
-    <React.Fragment>
-      <div className="outer-container">
-        <div className="inner-container">
-          <div className="header">Todo List</div>
-          <div className="inner-box">
+    <div className="outer-container">
+      <div className="inner-container">
+        <div className="header">Todo App</div>
+        <div className="inner-box">
+          {selectedTask ? (
             <div className="selected-task">
-              <input type="text" name="description" />
-              <div className="btn-container">
+              <input
+                type="text"
+                name="description"
+                value={selectedTask.description}
+                onChange={handleInputSelectChange}
+              />
+              <div
+                className="btn-container"
+                onClick={() => setSelectedTask(null)}
+              >
                 <FaTimes />
               </div>
-              <div className="btn-container">
+
+              <div className="btn-container" onClick={updateItem}>
                 <GrUpdate />
               </div>
             </div>
+          ) : (
             <div className="new-task">
-              <input type="text" name="description" />
-              <div className="btn-container">
+              <input
+                type="text"
+                name="description"
+                value={newTask.description}
+                onChange={handleInputChange}
+              />
+              <div className="btn-container" onClick={addNewItem}>
                 <FaPlus />
               </div>
             </div>
-            <div className="filters">
-              <div className="inner">
-                <span>All</span>
-                <span>Pending</span>
-                <span>Completed</span>
-              </div>
+          )}
 
-              <div className="tasks">
-                {taskList ? (
-                  taskList.map((task, index) => (
-                    <div
-                      className={`single-task ${
-                        task.completed ? "completed" : "pending"
-                      } `}
-                    >
-                      <p>{task.description}</p>
-                      <div className="actions">
-                        <div className="btn-container btn edit">
-                          <IoPencilOutline />
-                        </div>
-                      </div>
-                      <div className="actions">
-                        <div className="btn-container btn completed">
-                          <FaCheck />
-                        </div>
-                        <div className="actions">
-                          <div className="btn-container btn delete">
-                            <FaRegTrashCan />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <span>No Tasks Found</span>
-                )}
-              </div>
+          <div className="filters">
+            <div className="inner">
+              <span onClick={fetchData}>All</span>
+              <span onClick={() => fetchFilteredData(0)}>Pending</span>
+              <span onClick={() => fetchFilteredData(1)}>Completed</span>
             </div>
+          </div>
+
+          <div className="tasks">
+            {taskList.length ? (
+              taskList.map((task, index) => (
+                <div
+                  className={`single-task ${
+                    task.completed ? "completed" : "pending"
+                  }`}
+                >
+                  <p>{task.description}</p>
+                  <div className="actions">
+                    <div
+                      className="btn-container btn edit"
+                      onClick={() => setSelectedTask(task)}
+                    >
+                      <IoPencilOutline />
+                    </div>
+
+                    {task.completed ? (
+                      <div
+                        className="btn-container btn"
+                        onClick={() => toggleCompleted(task.id)}
+                      >
+                        <FaHourglass />
+                      </div>
+                    ) : (
+                      <div
+                        className="btn-container btn completed"
+                        onClick={() => toggleCompleted(task.id)}
+                      >
+                        <FaCheck />
+                      </div>
+                    )}
+
+                    <div
+                      className="btn-container btn delete"
+                      onClick={() => deleteItem(task.id)}
+                    >
+                      <FaRegTrashCan />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <span>No Tasks Found</span>
+            )}
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </div>
   );
 };
 
